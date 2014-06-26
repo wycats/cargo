@@ -5,13 +5,12 @@ use util::CargoResult;
 pub struct Dependency {
     name: String,
     namespace: SourceId,
-    req: VersionReq,
-    envs: Option<Vec<String>>
+    req: VersionReq
 }
 
 impl Dependency {
     pub fn parse(name: &str, version: Option<&str>,
-                 namespace: &SourceId, envs: Option<Vec<String>>) -> CargoResult<Dependency>
+                 namespace: &SourceId) -> CargoResult<Dependency>
     {
         let version = match version {
             Some(v) => try!(VersionReq::parse(v)),
@@ -21,8 +20,7 @@ impl Dependency {
         Ok(Dependency {
             name: name.to_str(),
             namespace: namespace.clone(),
-            req: version,
-            envs: envs
+            req: version
         })
     }
 

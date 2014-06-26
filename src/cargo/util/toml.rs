@@ -68,31 +68,13 @@ pub enum TomlDependency {
 
 
 #[deriving(Encodable,Decodable,PartialEq,Clone,Show)]
-enum Environments {
-    List(Vec<String>),
-    Single(String),
-    Default
-}
-
-impl Environments {
-    fn to_vec(&self) -> Option<Vec<String>> {
-        match *self {
-            List(ref list) => Some(list.clone()),
-            Single(ref string) => Some(vec!(string.clone())),
-            Default => None
-        }
-    }
-}
-
-#[deriving(Encodable,Decodable,PartialEq,Clone,Show)]
 pub struct DetailedTomlDependency {
     version: Option<String>,
     path: Option<String>,
     git: Option<String>,
     branch: Option<String>,
     tag: Option<String>,
-    rev: Option<String>,
-    env: Environments
+    rev: Option<String>
 }
 
 #[deriving(Encodable,Decodable,PartialEq,Clone)]
@@ -149,9 +131,9 @@ impl TomlManifest {
         match self.dependencies {
             Some(ref dependencies) => {
                 for (n, v) in dependencies.iter() {
-                    let (version, source_id, envs) = match *v {
+                    let (version, source_id) = match *v {
                         SimpleDep(ref string) => {
-                            (Some(string.clone()), SourceId::for_central(), None)
+                            (Some(string.clone()), SourceId::for_central())
                         },
                         DetailedDep(ref details) => {
                             let reference = details.branch.as_ref().map(|b| b.clone())
@@ -173,13 +155,13 @@ impl TomlManifest {
                                 })
                             }).unwrap_or(SourceId::for_central());
 
-                            (details.version.clone(), new_source_id, details.env.to_vec())
+                            (details.version.clone(), new_source_id)
                         }
                     };
 
                     deps.push(try!(Dependency::parse(n.as_slice(),
                                                      version.as_ref().map(|v| v.as_slice()),
-                                                     &source_id, envs)))
+                                                     &source_id)))
                 }
             }
             None => ()
